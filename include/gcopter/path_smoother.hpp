@@ -1,16 +1,15 @@
 #ifndef PATH_SMOOTHER_HPP
 #define PATH_SMOOTHER_HPP
 
-#include <iomanip>
-#include "cubic_spline.hpp"
-#include "lbfgs.hpp"
-
 #include <Eigen/Eigen>
-
 #include <cfloat>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <vector>
+
+#include "cubic_spline.hpp"
+#include "lbfgs.hpp"
 
 namespace path_smoother {
 
@@ -46,9 +45,9 @@ class PathSmoother {
 
     instance->cubSpline.setInnerPoints(inner_points);
 
-    Eigen::Matrix2Xd g_raw;
-    g_raw.resize(2, num_inner_points);
-    g_raw.setZero();
+    Eigen::Matrix2Xd g_total;
+    g_total.resize(2, num_inner_points);
+    g_total.setZero();
 
     double cost = 0.0;
 
@@ -71,30 +70,28 @@ class PathSmoother {
       }
     }
     // std::cout << "potential(without weight):" << cost << std::endl;
-    // std::cout << "potentialGrad:(wo weight)\n" << gradByPotential <<
-    // std::endl;
+    std::cout << "potentialGrad:(wo weight)\n" << gradByPotential << std::endl;
     cost *= instance->penaltyWeight;
-
-    g_raw += instance->penaltyWeight * gradByPotential;
+    g_total += instance->penaltyWeight * gradByPotential;
 
     // Add Energy
-    double energy = 0.0;
-    instance->cubSpline.getStretchEnergy(energy);
-    // std::cout << "energy:" << energy << std::endl;
-    cost += energy;
+    double cost_energy = 0.0;
+    instance->cubSpline.getStretchEnergy(cost_energy);
+    // std::cout << "cost_energy:" << cost_energy << std::endl;
+    cost += cost_energy;
 
-    Eigen::Matrix2Xd gradByEnergy;
-    gradByEnergy.resize(2, instance->pieceN - 1);
-    instance->cubSpline.getGrad(gradByEnergy);
-    g_raw += gradByEnergy;
+    Eigen::Matrix2Xd g_energy;
+    g_energy.resize(2, instance->pieceN - 1);
+    instance->cubSpline.getGrad(g_energy);
+    g_total += g_energy;
 
-    // std::cout << "energyGrad:\n" << gradByEnergy << std::endl;
+    std::cout << "g_energy:\n" << g_energy << std::endl;
 
-    // std::cout << "total cost(potential+energy):" << cost << std::endl;
-    // std::cout << "total grad\n" << g_raw << std::endl;
+    // std::cout << "total cost:" << cost << std::endl;
+    std::cout << "total grad\n" << g_total << std::endl;
 
-    g.head(num_inner_points) = g_raw.row(0).transpose();
-    g.tail(num_inner_points) = g_raw.row(1).transpose();
+    g.head(num_inner_points) = g_total.row(0).transpose();
+    g.tail(num_inner_points) = g_total.row(1).transpose();
 
     return cost;
   }

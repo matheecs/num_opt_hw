@@ -302,7 +302,7 @@ class CubicSpline {
     std::vector<double> durs(N, 1.0);
     auto c = CubicCurve(durs, cMats);
     curve = std::move(c);
-    std::cout << "curve = \n" << curve.getPositions() << std::endl;
+    // std::cout << "curve = \n" << curve.getPositions() << std::endl;
 
     return;
   }
@@ -326,7 +326,7 @@ class CubicSpline {
     // TODO
     // Energy -> 8cc'+12c'd+12cd'+24dd'
     gradByPoints.setZero();
-    // Piece0
+    // Piece 0
     Eigen::VectorXd c_diff, d_diff;
     c_diff = M_c_x_first.row(0).transpose() - M_D_x.row(0).transpose();
     d_diff = M_d_x_first.row(0).transpose() + M_D_x.row(0).transpose();
@@ -335,7 +335,7 @@ class CubicSpline {
                     12 * cMats[0].col(0) * c_diff.transpose() +
                     12 * cMats[0].col(1) * d_diff.transpose() +
                     24 * cMats[0].col(0) * d_diff.transpose();
-    // Piece1->(N-2)
+    // Piece 1->(N-2)
     for (int i = 1; i <= N - 2; ++i) {
       c_diff = M_c_x_first.row(i).transpose() -
                2 * M_D_x.row(i - 1).transpose() - M_D_x.row(i).transpose();
@@ -346,7 +346,7 @@ class CubicSpline {
                       12 * cMats[i].col(1) * d_diff.transpose() +
                       24 * cMats[i].col(0) * d_diff.transpose();
     }
-    // Piece(N-1)
+    // Piece (N-1)
     c_diff =
         M_c_x_first.row(N - 1).transpose() - 2 * M_D_x.row(N - 2).transpose();
     d_diff =
