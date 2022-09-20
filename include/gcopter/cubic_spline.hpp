@@ -263,7 +263,7 @@ class CubicSpline {
     coeffMat.col(3) = headP;
     coeffMat.col(2) = Eigen::Vector2d::Zero();
     coeffMat.col(1) = 3 * (inner_points.col(0) - headP) - b.row(0).transpose();
-    coeffMat.col(0) = 3 * (headP - inner_points.col(0)) + b.row(0).transpose();
+    coeffMat.col(0) = 2 * (headP - inner_points.col(0)) + b.row(0).transpose();
     // d-c-b-a
     cMats[0] = coeffMat;
 
